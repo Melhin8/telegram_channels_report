@@ -26,7 +26,6 @@ def choice_session(sessions: list, res: str) -> str:
         app.stop()
         return session_name
     elif res.lower() == 'q':
-        app.stop()
         exit()
 
 def message_from_file() -> str:
