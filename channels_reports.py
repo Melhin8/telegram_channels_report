@@ -6,6 +6,7 @@ from pyrogram.raw.functions.account import ReportPeer
 from pyrogram.raw.types import InputReportReasonOther
 from dotenv import load_dotenv
 
+
 def choice_session(sessions: list, res: str) -> str:
     """Request sessions and return str."""
     if res == '' or res.isnumeric():
@@ -13,20 +14,21 @@ def choice_session(sessions: list, res: str) -> str:
             err = input('Incorrect choice. Please repeat: ')
             return choice_session(sessions, err)
         else:
-                session_name = sessions[int(res)][:-8]
-                return session_name
+            session_name = sessions[int(res)][:-8]
+            return session_name
     elif res.lower() == 'c':
         session_name = input('Enter new session name: ')
         app = Client(
-            session_name, os.environ.get('API_ID'), 
-            os.environ.get('API_HASH'), 
-            hide_password = True
-            )
+            session_name, os.environ.get('API_ID'),
+            os.environ.get('API_HASH'),
+            hide_password=True
+        )
         app.start()
         app.stop()
         return session_name
     elif res.lower() == 'q':
         exit()
+
 
 def message_from_file() -> str:
     """Check existing message and return str."""
@@ -37,17 +39,19 @@ def message_from_file() -> str:
     else:
         return None
 
+
 def target_list_from_file() -> list:
     """Check existing target_list and return list."""
     target_list = []
     if os.path.isfile('target_list'):
-        with open('target_list') as file:            
+        with open('target_list') as file:
             for i in file.readlines():
                 i = i[i.find('t.me/')+5:].strip(' \n')
                 if i.rfind('/') > 0:
                     i = i[:i.rfind('/')]
                 target_list.append(i)
     return target_list
+
 
 def choice_target_list(session_name: str, app: object) -> list:
     """Request target_list and return list."""
@@ -63,18 +67,20 @@ def choice_target_list(session_name: str, app: object) -> list:
         target_list = [target]
     return target_list
 
+
 def choice_message() -> str:
     """Get message and return str."""
     msg = message_from_file()
-    print (f'Send a message: \n{msg}')
-    consent = input ('Consent? (Y/n): ')
+    print(f'Send a message: \n{msg}')
+    consent = input('Consent? (Y/n): ')
     if consent.lower() == 'n':
-        msg = input ('Enter new message: ')
-        save_msg = input ('Save your message for the future? (y/N): ')
+        msg = input('Enter new message: ')
+        save_msg = input('Save your message for the future? (y/N): ')
         if save_msg == 'y':
             with open('message', 'w+') as file:
                 file.write(f'{msg}')
     return msg
+
 
 def get_session() -> str:
     """Get existing sessions and return str."""
@@ -89,11 +95,13 @@ def get_session() -> str:
     session_name = choice_session(sessions, res)
     return session_name
 
+
 def input_reports_count(target_list: list) -> int:
     """Request number of reports sent and return int."""
-    print (f'Target \n{target_list} \nlocked.')
+    print(f'Target \n{target_list} \nlocked.')
     reports_count = int(input('Enter reports count: '))
     return reports_count
+
 
 def bombing(app: object, msg: str, target_list: list, reports_count: int) -> None:
     """Send reports on target_list reports_count times."""
@@ -102,18 +110,19 @@ def bombing(app: object, msg: str, target_list: list, reports_count: int) -> Non
         try:
             t_peer = app.resolve_peer(target)
         except:
-            print (f'{target} already blocked :)')
+            print(f'{target} already blocked :)')
             continue
         if t_peer is not None:
             reports_successful = 0
-            print (f'Complain about {target}...')
+            print(f'Complain about {target}...')
             # Send report
             while True:
                 s = app.invoke(ReportPeer(
-                    peer = t_peer, 
-                    reason = InputReportReasonOther(), 
-                    message = msg
-                    ))
+                    peer=t_peer,
+                    reason=InputReportReasonOther(),
+                    message=msg,
+                    )
+                )
                 if 's' in locals():
                     reports_successful += 1
                     print(f'Reports: {reports_successful}/{reports_count}', end='\r')
@@ -128,6 +137,7 @@ def bombing(app: object, msg: str, target_list: list, reports_count: int) -> Non
             print(f'Target \ {target} \ not resolved.')
     print('Complaining ended, all reports sent.')
 
+
 def choice_repeat(app: object, msg: str, target_list: list,  reports_count: int) -> None:
     """Resend reports with user consent."""
     choice = input('Again? (y/N): ')
@@ -140,6 +150,7 @@ def choice_repeat(app: object, msg: str, target_list: list,  reports_count: int)
         print('Incorrect choice. Please repeat')
         choice_repeat(app, msg, target_list, reports_count)
 
+
 if __name__ == "__main__":
     load_dotenv()
     session_name = get_session()
@@ -150,5 +161,5 @@ if __name__ == "__main__":
     target_list = choice_target_list(session_name, app)
     msg = choice_message()
     reports_count = input_reports_count(target_list)
-    bombing(app, msg, target_list, reports_count) #TODO: async
+    bombing(app, msg, target_list, reports_count)  # TODO: async
     choice_repeat(app, msg, target_list, reports_count)
