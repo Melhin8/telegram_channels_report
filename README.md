@@ -11,4 +11,4 @@ Create file `.env` and set variables `API_ID` and `API_HASH` as string [your cre
 Optionally, make changes to the `target_list` file by including a list of links to telegram complaint channels. Each link is on a new line.
 
 ## Using:
-Run `pipenv run channels_reports.py`.
+Run `pipenv run python3 channels_reports.py`.
